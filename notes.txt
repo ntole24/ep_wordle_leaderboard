@@ -1,0 +1,4 @@
+Privileged intents:
+
+Presence Intent - User activity, such as who is playing games
+Message Content Intent - Message Reading
