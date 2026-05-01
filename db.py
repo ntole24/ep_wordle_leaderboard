@@ -29,7 +29,7 @@ class db:
 
     def tables_init(self):
         create_players = '''
-            CREATE TABLE `defaultdb`.`new_table` (
+            CREATE TABLE `defaultdb`.`players` (
             `player_id` INT NOT NULL AUTO_INCREMENT,
             `discord_id` VARCHAR(100) NOT NULL,
             `name` VARCHAR(100) NOT NULL,
