@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import os
 import numpy as np
 import tabulate
+import wordle_player
 
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
@@ -23,14 +24,18 @@ wordle_channel_id = "insert integer here"
 
 # add a dictionary of JM wordle players here!!!
 
-players = {
+""" players = {
     "Player_ID": ["<@487622829748125696>", "<@1499297517492502609>", "<@&1457353878009020509>"],
     "Player_Name": ["P1", "P2", "P3"],
     "Player_Total": [1, 2, 3]
-}
+} """
 
-players_arr = np.array(players)
-print(players_arr)
+players = [wordle_player.wordle_player("<@487622829748125696>", "P1"), wordle_player.wordle_player("<@1499297517492502609>", "P2"), wordle_player.wordle_player("<@&1457353878009020509>", "P3")]
+
+for player in players:
+    print(player.get_id())
+    print(player.get_name())
+    print(player.get_total())
 
 # IDEA: adding a new player
 
@@ -40,8 +45,6 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    print(players_arr)
-
     author_id = message.author.id
     channel_id = message.channel.id
     content = message.content
@@ -68,12 +71,17 @@ async def on_message(message):
                 print(guess_number)
                 for j in range(guess_number_index + 1, len(spaced_line)):
                     # Locate each person, then add it to their total
-                    """ prev_val = players_df.loc[players_df["Player_ID"] == spaced_line[j], "Player_Total"]
-                    print(prev_val)
-                    players_df.loc[players_df["Player_ID"] == spaced_line[j], "Player_Total"] = prev_val + guess_number
-                    print(players_df.loc[players_df["Player_ID"] == spaced_line[j], "Player_Total"])
- """
+                    for player in players:
+                        if player.get_id() == spaced_line[j]:
+                            player.add_total(int(guess_number))
+
+                  
                     # print(spaced_line[j])
+
+    for player in players:
+        print(player.get_id())
+        print(player.get_name())
+        print(player.get_total())
 
                     
                 
