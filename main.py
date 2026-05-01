@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import os
 import numpy as np
 import tabulate
-import wordle_player
+import db
 
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
@@ -19,23 +19,11 @@ intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 # Responding to events
-wordle_author_id = "Wordle#2092"
-wordle_channel_id = "insert integer here"
 
 # add a dictionary of JM wordle players here!!!
 
-""" players = {
-    "Player_ID": ["<@487622829748125696>", "<@1499297517492502609>", "<@&1457353878009020509>"],
-    "Player_Name": ["P1", "P2", "P3"],
-    "Player_Total": [1, 2, 3]
-} """
-
-players = [wordle_player.wordle_player("<@487622829748125696>", "P1"), wordle_player.wordle_player("<@1499297517492502609>", "P2"), wordle_player.wordle_player("<@&1457353878009020509>", "P3")]
-
-for player in players:
-    print(player.get_id())
-    print(player.get_name())
-    print(player.get_total())
+leaderboard_db = db.db()
+leaderboard_db.tables_init()
 
 # IDEA: adding a new player
 
@@ -71,14 +59,14 @@ async def on_message(message):
                 print(guess_number)
                 for j in range(guess_number_index + 1, len(spaced_line)):
                     # Locate each person, then add it to their total
-                    for player in players:
+                    for player in db:
                         if player.get_id() == spaced_line[j]:
                             player.add_total(int(guess_number))
 
                   
                     # print(spaced_line[j])
 
-    for player in players:
+    for player in db:
         print(player.get_id())
         print(player.get_name())
         print(player.get_total())
@@ -90,6 +78,10 @@ async def on_message(message):
 
 @bot.command()
 async def leaderboard(ctx):
-    await ctx.reply(tabulate.tabulate(players_arr, headers='keys', tablefmt='grid', showindex=False))
+    result = f"""
+    Player {bot}
+    
+    """
+    await ctx.channel.send("Test")
 
 bot.run(token, log_handler=handler, log_level=logging.DEBUG) # any of the debug stuff is gonna be logged into discord.log file
