@@ -36,42 +36,44 @@ async def on_message(message):
     author_id = message.author.id
     channel_id = message.channel.id
     content = message.content
+    name = message.author.name
 
     if message.author == bot.user:
         return
 
-    if author_id == 487622829748125696 and channel_id == 1499450918477762621 and "streak" in content.lower():
-        lines = content.splitlines() # splits the diff newlines
-        
-        for i in range(len(lines)):
-            if i == 1:
-                guess_number_index = 1
-            elif i > 1:
-                guess_number_index = 0
-            else:
-                guess_number_index = -1
+    if author_id == 487622829748125696 and channel_id == 1499450918477762621:
+        print("HERE UYA GP WTF")
 
-            # Get guess number
-            if guess_number_index >= 0:
-                spaced_line = lines[i].split()
-                guess_number = spaced_line[guess_number_index][0]
+        if "streak" in content.lower():
+            lines = content.splitlines() # splits the diff newlines
+            
+            for i in range(len(lines)):
+                if i == 1:
+                    guess_number_index = 1
+                elif i > 1:
+                    guess_number_index = 0
+                else:
+                    guess_number_index = -1
 
-                print(guess_number)
-                for j in range(guess_number_index + 1, len(spaced_line)):
-                    # Locate each person, then add it to their total
-                    for player in db:
-                        if player.get_id() == spaced_line[j]:
-                            player.add_total(int(guess_number))
+                # Get guess number
+                if guess_number_index >= 0:
+                    spaced_line = lines[i].split()
+                    guess_number = spaced_line[guess_number_index][0]
 
-                  
-                    # print(spaced_line[j])
-
-    for player in db:
-        print(player.get_id())
-        print(player.get_name())
-        print(player.get_total())
-
-                    
+                    print(guess_number)
+                    for j in range(guess_number_index + 1, len(spaced_line)):
+                        # Locate each person, then add it to their total
+                        for player in db:
+                            if player.get_id() == spaced_line[j]:
+                                player.add_total(int(guess_number))
+        else:
+            print("HWOWWWW")
+            leaderboard_db.create_player(str(author_id), name)
+            leaderboard_db.read_player_from_id(str(author_id))
+            leaderboard_db.update_player_name(str(author_id), "ntole42")
+            leaderboard_db.read_player_from_id(str(author_id))
+            leaderboard_db.delete_player(str(author_id))
+            leaderboard_db.read_player_from_id(str(author_id))
                 
 
     await bot.process_commands(message)

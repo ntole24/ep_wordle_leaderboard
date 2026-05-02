@@ -8,6 +8,7 @@ class db:
             drop database if exists defaultdb;
             create database defaultdb;
         '''
+
         self.mysql = pymysql.connect(
             host=os.getenv('DB_HOST'),
             user=os.getenv('DB_USER'),
@@ -25,8 +26,6 @@ class db:
         self.cursor.execute(database_init)
         self.mysql.commit()
 
-        print("successful!!!")
-
     def tables_init(self):
         create_players = '''
             CREATE TABLE `defaultdb`.`players` (
@@ -39,6 +38,7 @@ class db:
         '''
 
         self.cursor.execute(create_players)
+        self.mysql.commit()
 
         create_scores = '''
             CREATE TABLE `defaultdb`.`scores` (
@@ -50,25 +50,67 @@ class db:
         '''
 
         self.cursor.execute(create_scores)
-
-        print("successful2!!!")
+        self.mysql.commit()
 
     def create_player(self, discord_id, name):
-        query = """
+        create_player_query = """
         INSERT INTO defaultdb.players (
 	    discord_id, name
         ) 
         VALUES ('%s', '%s')"""
-        
+
+        self.cursor.execute(create_player_query % (discord_id, name))
+        self.mysql.commit()
+
+        print("Success")
+
         return
     
-    def read_player(self):
+    def read_player_from_id(self, discord_id):
+        read_player_query = """
+            SELECT * FROM defaultdb.players WHERE discord_id = %s
+        """
+
+        self.cursor.execute(read_player_query % discord_id)
+        self.mysql.commit()
+
+        result = self.cursor.fetchone()
+
+        if result:
+            print("Result: ", result)
+            print(result['player_id'])
+            return result
+        else:
+            print("Person doesn't exist oohhh spooky")
+            return -1
+    
+    def update_player_name(self, discord_id, name):
+        row = self.read_player_from_id(discord_id)
+        player_id = row['player_id']
+
+        update_player_query = """
+            UPDATE defaultdb.players p
+            SET p.name = %s
+            WHERE p.player_id = %s
+        """
+
+        self.cursor.execute(update_player_query, (name, player_id))
+        self.mysql.commit()
+
         return
     
-    def update_player(self):
-        return
-    
-    def delete_player(self):
+    def delete_player(self, discord_id):
+        row = self.read_player_from_id(discord_id)
+        player_id = row['player_id']
+
+        delete_player_query = """
+            DELETE FROM defaultdb.players
+            WHERE player_id = %s
+        """
+
+        self.cursor.execute(delete_player_query, player_id)
+        self.mysql.commit()
+
         return
 
     
