@@ -6,6 +6,7 @@ import os
 import numpy as np
 import tabulate
 import db
+import datetime as dt
 
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
@@ -42,8 +43,6 @@ async def on_message(message):
         return
 
     if author_id == 487622829748125696 and channel_id == 1499450918477762621:
-        print("HERE UYA GP WTF")
-
         if "streak" in content.lower():
             lines = content.splitlines() # splits the diff newlines
             
@@ -67,13 +66,14 @@ async def on_message(message):
                             if player.get_id() == spaced_line[j]:
                                 player.add_total(int(guess_number))
         else:
-            print("HWOWWWW")
-            leaderboard_db.create_player(str(author_id), name)
-            leaderboard_db.read_player_from_id(str(author_id))
-            leaderboard_db.update_player_name(str(author_id), "ntole42")
-            leaderboard_db.read_player_from_id(str(author_id))
-            leaderboard_db.delete_player(str(author_id))
-            leaderboard_db.read_player_from_id(str(author_id))
+            leaderboard_db.sample_players()
+            leaderboard_db.sample_scores()
+            print(leaderboard_db.read_scores())
+            print("scores of player id 1")
+            print(leaderboard_db.read_scores_from_discord_id(str(author_id)))
+
+            print("Deleting player 1")
+            leaderboard_db.delete_player('3847291056')
                 
 
     await bot.process_commands(message)

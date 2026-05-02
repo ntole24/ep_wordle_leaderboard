@@ -46,7 +46,14 @@ class db:
             `player_id` INT NOT NULL,
             `guesses` INT NOT NULL,
             `date` DATE NOT NULL,
-            PRIMARY KEY (`score_id`));
+            PRIMARY KEY (`score_id`),
+            UNIQUE INDEX `score_id_UNIQUE` (`score_id` ASC) VISIBLE,
+            INDEX `player_id_idx` (`player_id` ASC) VISIBLE,
+            CONSTRAINT `player_id`
+                FOREIGN KEY (`player_id`)
+                REFERENCES `defaultdb`.`players` (`player_id`)
+                ON DELETE CASCADE
+                ON UPDATE NO ACTION);
         '''
 
         self.cursor.execute(create_scores)
@@ -54,12 +61,13 @@ class db:
 
     def create_player(self, discord_id, name):
         create_player_query = """
-        INSERT INTO defaultdb.players (
-	    discord_id, name
-        ) 
-        VALUES ('%s', '%s')"""
+            INSERT INTO defaultdb.players (
+            discord_id, name
+            ) 
+            VALUES (%s, %s)
+        """
 
-        self.cursor.execute(create_player_query % (discord_id, name))
+        self.cursor.execute(create_player_query, (discord_id, name))
         self.mysql.commit()
 
         print("Success")
@@ -71,14 +79,12 @@ class db:
             SELECT * FROM defaultdb.players WHERE discord_id = %s
         """
 
-        self.cursor.execute(read_player_query % discord_id)
+        self.cursor.execute(read_player_query, discord_id)
         self.mysql.commit()
 
         result = self.cursor.fetchone()
 
         if result:
-            print("Result: ", result)
-            print(result['player_id'])
             return result
         else:
             print("Person doesn't exist oohhh spooky")
@@ -103,6 +109,7 @@ class db:
         row = self.read_player_from_id(discord_id)
         player_id = row['player_id']
 
+        # Delete the player
         delete_player_query = """
             DELETE FROM defaultdb.players
             WHERE player_id = %s
@@ -111,6 +118,139 @@ class db:
         self.cursor.execute(delete_player_query, player_id)
         self.mysql.commit()
 
-        return
+        # Delete that player's scores
 
+        return
     
+    # discord_id - string
+    # Guesses - int
+    # date - Date
+    def create_score(self, discord_id, guesses, date):
+        buffer = self.read_player_from_id(discord_id)
+        player_id = buffer['player_id'] 
+
+        create_score_query = """
+            INSERT INTO defaultdb.scores (
+            player_id, guesses, date
+            ) 
+            VALUES (%s, %s, %s)
+        """
+
+        self.cursor.execute(create_score_query, (player_id, guesses, date))
+        self.mysql.commit()
+
+        return
+    
+    def read_scores(self):
+        read_scores_query = """
+            SELECT * FROM defaultdb.scores
+        """
+
+        self.cursor.execute(read_scores_query)
+        self.mysql.commit()
+
+        result = self.cursor.fetchall()
+
+        if result:
+            return result
+        else:
+            print("No scores wtaf")
+            return -1
+
+    def read_scores_from_discord_id(self, discord_id):
+        """ buffer = self.read_player_from_id(discord_id)
+        player_id = buffer['player_id'] """
+
+        player_id = "1" # REMOVE THIS LATER!!!
+
+        read_player_query = """
+            SELECT * FROM defaultdb.scores WHERE player_id = %s
+        """
+
+        self.cursor.execute(read_player_query, player_id)
+        self.mysql.commit()
+
+        result = self.cursor.fetchall()
+
+        if result:
+            return result
+        else:
+            print("Person doesn't exist oohhh spooky")
+            return -1
+
+    def sample_players(self):
+        query = """
+            INSERT INTO defaultdb.players (discord_id, name) VALUES
+            ('3847291056', 'Alice'),
+            ('7193048572', 'Bob'),
+            ('5820394716', 'Charlie'),
+            ('9174836205', 'Diana'),
+            ('2648193057', 'Ethan'),
+            ('8315720496', 'Fiona'),
+            ('4072958631', 'George'),
+            ('6531804927', 'Hannah'),
+            ('1897345062', 'Ivan');
+        """
+
+        self.cursor.execute(query)
+        self.mysql.commit()
+        
+    def sample_scores(self):
+        query = """
+        INSERT INTO defaultdb.scores (player_id, guesses, date) VALUES
+            (3, 4, '2024-01-15'),
+            (1, 2, '2024-01-15'),
+            (5, 6, '2024-01-16'),
+            (2, 1, '2024-01-16'),
+            (4, 3, '2024-01-17'),
+            (1, 7, '2024-01-17'),
+            (3, 5, '2024-01-18'),
+            (5, 2, '2024-01-18'),
+            (2, 4, '2024-01-19'),
+            (4, 6, '2024-01-19'),
+            (1, 1, '2024-01-20'),
+            (3, 3, '2024-01-20'),
+            (5, 7, '2024-01-21'),
+            (2, 2, '2024-01-21'),
+            (4, 5, '2024-01-22'),
+            (1, 4, '2024-01-22'),
+            (3, 6, '2024-01-23'),
+            (5, 1, '2024-01-23'),
+            (2, 3, '2024-01-24'),
+            (4, 7, '2024-01-24'),
+            (1, 2, '2024-01-25'),
+            (3, 5, '2024-01-25'),
+            (5, 4, '2024-01-26'),
+            (2, 6, '2024-01-26'),
+            (4, 1, '2024-01-27'),
+            (1, 3, '2024-01-27'),
+            (3, 7, '2024-01-28'),
+            (5, 2, '2024-01-28'),
+            (2, 5, '2024-01-29'),
+            (4, 4, '2024-01-29'),
+            (1, 6, '2024-02-01'),
+            (3, 1, '2024-02-01'),
+            (5, 3, '2024-02-02'),
+            (2, 7, '2024-02-02'),
+            (4, 2, '2024-02-03'),
+            (1, 5, '2024-02-03'),
+            (3, 4, '2024-02-04'),
+            (5, 6, '2024-02-04'),
+            (2, 1, '2024-02-05'),
+            (4, 3, '2024-02-05'),
+            (1, 7, '2024-02-06'),
+            (3, 2, '2024-02-06'),
+            (5, 5, '2024-02-07'),
+            (2, 4, '2024-02-07'),
+            (4, 6, '2024-02-08'),
+            (1, 1, '2024-02-08'),
+            (3, 3, '2024-02-09'),
+            (5, 7, '2024-02-09'),
+            (2, 2, '2024-02-10'),
+            (4, 5, '2024-02-10');        
+        """
+
+        self.cursor.execute(query)
+        self.mysql.commit()
+
+        return
