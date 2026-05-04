@@ -26,8 +26,6 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 
 leaderboard_db = db.db()
 leaderboard_db.tables_init()
-leaderboard_db.sample_players()
-leaderboard_db.sample_scores()
 
 # IDEA: adding a new player
 
