@@ -80,7 +80,6 @@ class db:
         """
 
         self.cursor.execute(read_player_query, discord_id)
-        self.mysql.commit()
 
         result = self.cursor.fetchone()
 
@@ -126,7 +125,9 @@ class db:
     # Guesses - int
     # date - Date
     def create_score(self, discord_id, guesses, date):
+        print(discord_id)
         buffer = self.read_player_from_id(discord_id)
+        print(buffer)
         player_id = buffer['player_id'] 
 
         create_score_query = """
@@ -147,7 +148,6 @@ class db:
         """
 
         self.cursor.execute(read_scores_query)
-        self.mysql.commit()
 
         result = self.cursor.fetchall()
 
@@ -168,7 +168,6 @@ class db:
         """
 
         self.cursor.execute(read_player_query, player_id)
-        self.mysql.commit()
 
         result = self.cursor.fetchall()
 
@@ -176,6 +175,47 @@ class db:
             return result
         else:
             print("Person doesn't exist oohhh spooky")
+            return -1
+        
+    def read_player_stats_totalOrder(self):
+        print("READING TOTALS")
+
+        player_total_query = """
+            SELECT s.player_id as Player_ID, p.name as Name, SUM(s.guesses) as Total_Guesses, ROUND(AVG(s.guesses * 1.0), 2) as Average_Guesses            FROM defaultdb.scores s
+            JOIN defaultdb.players p on s.player_id = p.player_id
+            GROUP BY s.player_id, p.name
+            ORDER BY SUM(s.guesses) ASC;
+        """
+
+        self.cursor.execute(player_total_query)
+
+        result = self.cursor.fetchall()
+
+        if result:
+            return result
+        else:
+            print("No scores???")
+            return -1
+        
+    def read_player_stats_averageOrder(self):
+        print("READING TOTALS")
+
+        player_total_query = """
+            SELECT s.player_id as Player_ID, p.name as Name, SUM(s.guesses) as Total_Guesses, ROUND(AVG(s.guesses * 1.0), 2) as Average_Guesses
+            FROM defaultdb.scores s
+            JOIN defaultdb.players p on s.player_id = p.player_id
+            GROUP BY s.player_id, p.name
+            ORDER BY AVG(s.guesses) ASC;
+        """
+
+        self.cursor.execute(player_total_query)
+
+        result = self.cursor.fetchall()
+
+        if result:
+            return result
+        else:
+            print("No scores???")
             return -1
 
     def sample_players(self):
