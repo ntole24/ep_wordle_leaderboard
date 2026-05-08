@@ -74,6 +74,21 @@ class db:
 
         return
     
+    def read_all_players(self):
+        read_all_scores_query = """
+            SELECT * FROM defaultdb.scores
+        """
+
+        self.cursor.execute(read_all_scores_query)
+
+        result = self.cursor.fetchall()
+
+        if result:
+            return result
+        else:
+            print("No players wtaf")
+            return -1
+    
     def read_player_from_id(self, discord_id):
         read_player_query = """
             SELECT * FROM defaultdb.players WHERE discord_id = %s
@@ -125,9 +140,7 @@ class db:
     # Guesses - int
     # date - Date
     def create_score(self, discord_id, guesses, date):
-        print(discord_id)
         buffer = self.read_player_from_id(discord_id)
-        print(buffer)
         player_id = buffer['player_id'] 
 
         create_score_query = """
@@ -139,6 +152,8 @@ class db:
 
         self.cursor.execute(create_score_query, (player_id, guesses, date))
         self.mysql.commit()
+
+
 
         return
     
@@ -178,8 +193,6 @@ class db:
             return -1
         
     def read_player_stats_totalOrder(self):
-        print("READING TOTALS")
-
         player_total_query = """
             SELECT s.player_id as Player_ID, p.name as Name, SUM(s.guesses) as Total_Guesses, ROUND(AVG(s.guesses * 1.0), 2) as Average_Guesses            FROM defaultdb.scores s
             JOIN defaultdb.players p on s.player_id = p.player_id
@@ -198,8 +211,6 @@ class db:
             return -1
         
     def read_player_stats_averageOrder(self):
-        print("READING TOTALS")
-
         player_total_query = """
             SELECT s.player_id as Player_ID, p.name as Name, SUM(s.guesses) as Total_Guesses, ROUND(AVG(s.guesses * 1.0), 2) as Average_Guesses
             FROM defaultdb.scores s
@@ -290,6 +301,33 @@ class db:
             (4, 5, '2024-02-10');        
         """
 
+        self.cursor.execute(query)
+        self.mysql.commit()
+
+        return
+    
+    def sample_duplicate(self, i):
+        print("duplicating!!!")
+        
+        query = ""
+
+        if i == 0:
+            query = """ INSERT INTO defaultdb.scores (player_id, guesses, date) VALUES
+                (3, 4, '2024-01-15'); """
+        elif i == 1:
+            query = """ INSERT INTO defaultdb.scores (player_id, guesses, date) VALUES
+                (3, 4, '2024-01-15'); """
+        elif i == 2:
+            query = """ INSERT INTO defaultdb.scores (player_id, guesses, date) VALUES
+                (3, 4, '2024-01-15'); """
+        elif i == 3:
+            query = """ INSERT INTO defaultdb.scores (player_id, guesses, date) VALUES
+                (3, 4, '2024-01-15'); """
+        elif i == 4:
+            query = """ INSERT INTO defaultdb.scores (player_id, guesses, date) VALUES
+                (3, 4, '2024-01-15'); """
+
+        
         self.cursor.execute(query)
         self.mysql.commit()
 
