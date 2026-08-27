@@ -75,11 +75,11 @@ class db:
         return
     
     def read_all_players(self):
-        read_all_scores_query = """
-            SELECT * FROM defaultdb.scores
+        read_all_players_query = """
+            SELECT * FROM defaultdb.players
         """
 
-        self.cursor.execute(read_all_scores_query)
+        self.cursor.execute(read_all_players_query)
 
         result = self.cursor.fetchall()
 
@@ -140,6 +140,7 @@ class db:
     # Guesses - int
     # date - Date
     def create_score(self, discord_id, guesses, date):
+        print("Creating a score!")
         buffer = self.read_player_from_id(discord_id)
         player_id = buffer['player_id'] 
 
