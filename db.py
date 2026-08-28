@@ -4,11 +4,6 @@ import os
 class db:
     
     def __init__(self):
-        database_init = '''
-            drop database if exists defaultdb;
-            create database defaultdb;
-        '''
-
         self.mysql = pymysql.connect(
             host=os.getenv('DB_HOST'),
             user=os.getenv('DB_USER'),
@@ -23,10 +18,17 @@ class db:
         )
 
         self.cursor = self.mysql.cursor()
+
+    def database_init(self):
+        database_init = '''
+            drop database if exists defaultdb;
+            create database defaultdb;
+        '''
+
+        self.cursor = self.mysql.cursor()
         self.cursor.execute(database_init)
         self.mysql.commit()
 
-    def tables_init(self):
         create_players = '''
             CREATE TABLE `defaultdb`.`players` (
             `player_id` INT NOT NULL AUTO_INCREMENT,
@@ -193,31 +195,18 @@ class db:
             print("Person doesn't exist oohhh spooky")
             return -1
         
-    def read_player_stats_totalOrder(self):
-        player_total_query = """
-            SELECT s.player_id as Player_ID, p.name as Name, SUM(s.guesses) as Total_Guesses, ROUND(AVG(s.guesses * 1.0), 2) as Average_Guesses            FROM defaultdb.scores s
-            JOIN defaultdb.players p on s.player_id = p.player_id
-            GROUP BY s.player_id, p.name
-            ORDER BY SUM(s.guesses) ASC;
-        """
+    def read_player_stats(self, orderType):
+        asc_or_desc = "ASC"
 
-        self.cursor.execute(player_total_query)
+        if orderType == "Total_Games":
+            asc_or_desc = "DESC"
 
-        result = self.cursor.fetchall()
-
-        if result:
-            return result
-        else:
-            print("No scores???")
-            return -1
-        
-    def read_player_stats_averageOrder(self):
-        player_total_query = """
-            SELECT s.player_id as Player_ID, p.name as Name, SUM(s.guesses) as Total_Guesses, ROUND(AVG(s.guesses * 1.0), 2) as Average_Guesses
+        player_total_query = f"""
+            SELECT s.player_id as Player_ID, p.name as Name, SUM(s.guesses) as Total_Guesses, ROUND(AVG(s.guesses * 1.0), 2) as Average_Guesses, COUNT(p.player_id) as Total_Games
             FROM defaultdb.scores s
             JOIN defaultdb.players p on s.player_id = p.player_id
             GROUP BY s.player_id, p.name
-            ORDER BY AVG(s.guesses) ASC;
+            ORDER BY {orderType} {asc_or _desc};
         """
 
         self.cursor.execute(player_total_query)
@@ -229,107 +218,39 @@ class db:
         else:
             print("No scores???")
             return -1
-
-    def sample_players(self):
-        query = """
-            INSERT INTO defaultdb.players (discord_id, name) VALUES
-            ('3847291056', 'Alice'),
-            ('7193048572', 'Bob'),
-            ('5820394716', 'Charlie'),
-            ('9174836205', 'Diana'),
-            ('2648193057', 'Ethan'),
-            ('8315720496', 'Fiona'),
-            ('4072958631', 'George'),
-            ('6531804927', 'Hannah'),
-            ('1897345062', 'Ivan');
+        
+    def get_score_from_id_and_date(self, discord_id, date):
+        score_from_id_and_date_query = """
+            SELECT *
+            FROM defaultdb.scores s
+            JOIN defaultdb.players p on s.player_id = p.player_id
+            WHERE p.discord_id = %s AND s.date = %s 
         """
 
-        self.cursor.execute(query)
-        self.mysql.commit()
+        self.cursor.execute(score_from_id_and_date_query, (discord_id, str(date)))
         
-    def sample_scores(self):
-        query = """
-        INSERT INTO defaultdb.scores (player_id, guesses, date) VALUES
-            (3, 4, '2024-01-15'),
-            (1, 2, '2024-01-15'),
-            (5, 6, '2024-01-16'),
-            (2, 1, '2024-01-16'),
-            (4, 3, '2024-01-17'),
-            (1, 7, '2024-01-17'),
-            (3, 5, '2024-01-18'),
-            (5, 2, '2024-01-18'),
-            (2, 4, '2024-01-19'),
-            (4, 6, '2024-01-19'),
-            (1, 1, '2024-01-20'),
-            (3, 3, '2024-01-20'),
-            (5, 7, '2024-01-21'),
-            (2, 2, '2024-01-21'),
-            (4, 5, '2024-01-22'),
-            (1, 4, '2024-01-22'),
-            (3, 6, '2024-01-23'),
-            (5, 1, '2024-01-23'),
-            (2, 3, '2024-01-24'),
-            (4, 7, '2024-01-24'),
-            (1, 2, '2024-01-25'),
-            (3, 5, '2024-01-25'),
-            (5, 4, '2024-01-26'),
-            (2, 6, '2024-01-26'),
-            (4, 1, '2024-01-27'),
-            (1, 3, '2024-01-27'),
-            (3, 7, '2024-01-28'),
-            (5, 2, '2024-01-28'),
-            (2, 5, '2024-01-29'),
-            (4, 4, '2024-01-29'),
-            (1, 6, '2024-02-01'),
-            (3, 1, '2024-02-01'),
-            (5, 3, '2024-02-02'),
-            (2, 7, '2024-02-02'),
-            (4, 2, '2024-02-03'),
-            (1, 5, '2024-02-03'),
-            (3, 4, '2024-02-04'),
-            (5, 6, '2024-02-04'),
-            (2, 1, '2024-02-05'),
-            (4, 3, '2024-02-05'),
-            (1, 7, '2024-02-06'),
-            (3, 2, '2024-02-06'),
-            (5, 5, '2024-02-07'),
-            (2, 4, '2024-02-07'),
-            (4, 6, '2024-02-08'),
-            (1, 1, '2024-02-08'),
-            (3, 3, '2024-02-09'),
-            (5, 7, '2024-02-09'),
-            (2, 2, '2024-02-10'),
-            (4, 5, '2024-02-10');        
+        result = self.cursor.fetchall()
+
+        if result:
+            return result
+        else:
+            print("No score???")
+            return -1
+
+    def get_total_games(self):
+        total_games_query = """
+            SELECT p.name, COUNT(p.player_id) as Total_Games
+            FROM defaultdb.scores s
+            JOIN defaultdb.players p on s.player_id = p.player_id
+            GROUP BY p.player_id;
         """
 
-        self.cursor.execute(query)
-        self.mysql.commit()
+        self.cursor.execute(total_games_query)
+                
+        result = self.cursor.fetchall()
 
-        return
-    
-    def sample_duplicate(self, i):
-        print("duplicating!!!")
-        
-        query = ""
-
-        if i == 0:
-            query = """ INSERT INTO defaultdb.scores (player_id, guesses, date) VALUES
-                (3, 4, '2024-01-15'); """
-        elif i == 1:
-            query = """ INSERT INTO defaultdb.scores (player_id, guesses, date) VALUES
-                (3, 4, '2024-01-15'); """
-        elif i == 2:
-            query = """ INSERT INTO defaultdb.scores (player_id, guesses, date) VALUES
-                (3, 4, '2024-01-15'); """
-        elif i == 3:
-            query = """ INSERT INTO defaultdb.scores (player_id, guesses, date) VALUES
-                (3, 4, '2024-01-15'); """
-        elif i == 4:
-            query = """ INSERT INTO defaultdb.scores (player_id, guesses, date) VALUES
-                (3, 4, '2024-01-15'); """
-
-        
-        self.cursor.execute(query)
-        self.mysql.commit()
-
-        return
+        if result:
+            return result
+        else:
+            print("No score???")
+            return -1
