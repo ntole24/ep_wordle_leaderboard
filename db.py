@@ -206,7 +206,7 @@ class db:
             FROM defaultdb.scores s
             JOIN defaultdb.players p on s.player_id = p.player_id
             GROUP BY s.player_id, p.name
-            ORDER BY {orderType} {asc_or _desc};
+            ORDER BY {orderType} {asc_or_desc};
         """
 
         self.cursor.execute(player_total_query)
